@@ -12,7 +12,7 @@ APOD_URL = "https://api.nasa.gov/planetary/apod"
 MARS_ROVER_URL = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 NEO_URL = "https://api.nasa.gov/neo/rest/v1/feed"
 
-st.title('NASA API Explorer')
+st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.sidebar.selectbox(
     'Choose an API to explore:',
