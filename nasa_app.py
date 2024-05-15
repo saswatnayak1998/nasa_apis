@@ -51,7 +51,7 @@ elif api_choice == 'Mars Rover Photos':
 
 elif api_choice == 'Near Earth Objects':
     # User inputs for date range
-    selected_date = st.date_input("Select date:", datetime.now().date())
+    selected_date = st.date_input("Select date(data will be shown for the trailing 6 days):", datetime.now().date())
     start_date = selected_date - timedelta(days=6)
     end_date = selected_date  # The user-selected date is treated as the end date
 
