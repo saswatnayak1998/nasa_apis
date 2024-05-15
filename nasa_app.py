@@ -18,6 +18,22 @@ api_choice = st.sidebar.selectbox(
     'Choose an API to explore:',
     ('Astronomy Picture of the Day', 'Mars Rover Photos', 'Near Earth Objects')
 )
+def check_available_dates(rover, month, year):
+    start_date = datetime(year, month, 1)
+    end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    available_dates = []
+    
+    while start_date <= end_date:
+        response = requests.get(f"{MARS_ROVER_URL}/{rover}/photos", params={
+            "earth_date": start_date.strftime('%Y-%m-%d'),
+            "api_key": API_KEY
+        })
+        data = response.json()
+        if data['photos']:
+            available_dates.append(start_date)
+        start_date += timedelta(days=1)
+    
+    return available_dates
 
 def fetch_apod():
     return requests.get(APOD_URL, params={"api_key": API_KEY}).json()
@@ -37,7 +53,17 @@ if api_choice == 'Astronomy Picture of the Day':
 
 elif api_choice == 'Mars Rover Photos':
     rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
-    date = st.date_input("Choose a date:", datetime.now() - timedelta(days=1))
+    chosen_month = st.selectbox('Select Month:', range(1, 13), format_func=lambda x: datetime(1, x, 1).strftime('%B'))
+    chosen_year = st.number_input('Select Year:', min_value=2012, max_value=datetime.now().year, value=datetime.now().year)
+    
+    if st.button('Check Available Dates'):
+        available_dates = check_available_dates(rover_choice, chosen_month, chosen_year)
+        if available_dates:
+            st.success(f"Photos available on: {[date.strftime('%Y-%m-%d') for date in available_dates]}")
+        else:
+            st.error("No photos available for this month.")
+    
+    date = st.date_input("Choose a date to view photos:", min_value=min(available_dates, default=datetime.now()), max_value=max(available_dates, default=datetime.now()))
     photos = fetch_mars_photos(rover_choice, date.strftime('%Y-%m-%d'))
     if photos.get('photos'):
         for photo in photos['photos']:
