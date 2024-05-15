@@ -28,8 +28,13 @@ def fetch_mars_photos(rover, date):
     return requests.get(url, params={"api_key": API_KEY, "earth_date": date}).json()
 
 def fetch_neo(start_date, end_date):
-    return requests.get(NEO_URL, params={"api_key": API_KEY, "start_date": start_date, "end_date": end_date}).json()
-
+    params = {
+        "start_date": start_date,
+        "end_date": end_date,
+        "api_key": API_KEY
+    }
+    response = requests.get(NEO_URL, params=params)
+    return response.json()
 if api_choice == 'Astronomy Picture of the Day':
     apod_data = fetch_apod()
     if 'url' in apod_data:
@@ -45,24 +50,38 @@ elif api_choice == 'Mars Rover Photos':
             st.image(photo['img_src'], caption=f"Rover: {rover_choice} Photo ID: {photo['id']}")
 
 elif api_choice == 'Near Earth Objects':
-    start_date = st.date_input("Start date:", datetime.now() - timedelta(days=7))
-    end_date = st.date_input("End date:", datetime.now())
+    # User inputs for date range
+    selected_date = st.date_input("Select date:", datetime.now().date())
+    start_date = selected_date - timedelta(days=6)
+    end_date = selected_date  # The user-selected date is treated as the end date
+
+    # Fetching data
     neo_data = fetch_neo(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     if 'near_earth_objects' in neo_data:
-        df = pd.DataFrame([
-            {
-                "name": obj["name"],
-                "diameter": obj["estimated_diameter"]["meters"]["estimated_diameter_max"],
-                "close_approach_date": data["close_approach_date"],
-                "miss_distance": float(data["miss_distance"]["kilometers"]),
-                "velocity": float(data["relative_velocity"]["kilometers_per_hour"])
-            }
-            for date, objects in neo_data["near_earth_objects"].items()
-            for obj in objects
-            for data in obj["close_approach_data"]
-        ])
-        fig = px.scatter(df, x="miss_distance", y="velocity", size="diameter", color="name", hover_data=["close_approach_date"])
-        st.plotly_chart(fig)
+        # Preparing the dataframe
+        data = []
+        for date, objects in neo_data["near_earth_objects"].items():
+            for obj in objects:
+                for approach_data in obj["close_approach_data"]:
+                    data.append({
+                        "name": obj["name"],
+                        "diameter": obj["estimated_diameter"]["meters"]["estimated_diameter_max"],
+                        "close_approach_date": approach_data["close_approach_date"],
+                        "miss_distance": float(approach_data["miss_distance"]["kilometers"]),
+                        "velocity": float(approach_data["relative_velocity"]["kilometers_per_hour"])
+                    })
+        if data:
+            df = pd.DataFrame(data)
+            # Generating the scatter plot
+            fig = px.scatter(df, x="miss_distance", y="velocity", size="diameter",
+                             color="name", hover_data=["close_approach_date"],
+                             labels={"miss_distance": "Miss Distance (km)", "velocity": "Velocity (km/h)"},
+                             title="Near Earth Object Data for the selected period")
+            st.plotly_chart(fig)
+        else:
+            st.error("No near Earth object data available for the selected dates.")
+    else:
+        st.error("Failed to retrieve NEO data or no data available for the selected period.")
 
 st.sidebar.header("About")
 st.sidebar.text("Explore various NASA APIs including daily astronomy pictures, Mars rover photos, and data about near-Earth objects.")
