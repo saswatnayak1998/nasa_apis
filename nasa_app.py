@@ -24,8 +24,15 @@ def fetch_apod():
     return requests.get(APOD_URL, params={"api_key": API_KEY}).json()
 
 def fetch_mars_photos(rover, date):
+    """Fetch photos from the Mars Rover API."""
     url = f"{MARS_ROVER_URL}/{rover}/photos"
-    return requests.get(url, params={"api_key": API_KEY, "earth_date": date}).json()
+    params = {"api_key": API_KEY, "earth_date": date}
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Failed to fetch data from NASA API.")
+        return {"photos": []}  #
 
 def fetch_neo(start_date, end_date):
     params = {
@@ -42,7 +49,7 @@ if api_choice == 'Astronomy Picture of the Day':
         st.write(apod_data["explanation"])
 
 elif api_choice == 'Mars Rover Photos':
-    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
+    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity'])
     date = st.date_input("Choose a date:", datetime.now() - timedelta(days=1))
     photos = fetch_mars_photos(rover_choice, date.strftime('%Y-%m-%d'))
     if photos.get('photos'):
