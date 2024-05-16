@@ -2,4 +2,5 @@ plotly
 pandas
 requests
 datetime
+streamlit-folium
 folium
