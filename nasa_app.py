@@ -1,13 +1,18 @@
 
 
-
+import random
 import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
+import folium
+from streamlit_folium import folium_static
 
-API_KEY = "KFvIFI8nJKBcLk7TBPRaIuMDMGf41qTnfnqIKz2H"
+
+api_keys = ["pl2NcVYoHW1bLwZc9THdmIpGaSKKuRf7PE5Eu0rc", "KFvIFI8nJKBcLk7TBPRaIuMDMGf41qTnfnqIKz2H"]
+
+API_KEY = random.choice(api_keys)
 APOD_URL = "https://api.nasa.gov/planetary/apod"
 MARS_ROVER_URL = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 NEO_URL = "https://api.nasa.gov/neo/rest/v1/feed"
@@ -16,9 +21,59 @@ st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.selectbox(
     'Choose an API to explore:',
-    ('Near Earth Objects', 'Astronomy Picture of the Day', 'Mars Rover Photos')
+    ('Near Earth Objects', 'Astronomy Picture of the Day', 'Mars Rover Photos', 'EPIC Imagery', 'EONET Natural Events')
 )
 
+def fetch_epic_data():
+    API_KEY = random.choice(api_keys)  # Randomly choose an API key
+    EPIC_URL = "https://api.nasa.gov/EPIC/api/natural/images"
+    params = {
+        "api_key": API_KEY
+    }
+    response = requests.get(EPIC_URL, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        st.error("Failed to retrieve EPIC data.")
+        return []
+
+def display_epic_images():
+    st.header("EPIC Daily Images of Earth")
+    images = fetch_epic_data()
+    if images:
+        for image in images:
+            date = datetime.strptime(image['date'], "%Y-%m-%d %H:%M:%S").date()
+            image_url = f"https://epic.gsfc.nasa.gov/archive/natural/{date.year}/{date.month:02d}/{date.day:02d}/png/{image['image']}.png"
+            st.image(image_url, caption=f"Date: {date}")
+    else:
+        st.write("No images available.")
+
+def fetch_eonet_events():
+    EONET_URL = "https://eonet.gsfc.nasa.gov/api/v2.1/events"
+    params = {
+        "status": "open",  # Fetch only ongoing events
+        "limit": 50        # Limit to 50 events for display purposes
+    }
+    response = requests.get(EONET_URL, params=params)
+    if response.status_code == 200:
+        return response.json()['events']
+    else:
+        st.error("Failed to fetch EONET data.")
+        return []
+def display_events_on_map(events):
+    # Start with a base map
+    m = folium.Map(location=[20, 0], zoom_start=2)
+    # Add markers for each event
+    for event in events:
+        for coord in event['geometries']:
+            if 'coordinates' in coord:
+                folium.Marker(
+                    location=[coord['coordinates'][1], coord['coordinates'][0]],
+                    popup=f"{event['title']}",
+                    tooltip=event['title']
+                ).add_to(m)
+    # Display the map in Streamlit
+    folium_static(m)
 
 def fetch_apod():
     response = requests.get(APOD_URL, params={"api_key": API_KEY})
@@ -93,6 +148,15 @@ elif api_choice == 'Mars Rover Photos':
             st.image(photo['img_src'], caption=f"Rover: {rover_choice} Photo ID: {photo['id']}")
 
 
+elif api_choice == 'EONET Natural Events':
+    st.header("EONET Natural Events")
+    events = fetch_eonet_events()
+    if events:
+        display_events_on_map(events)
+    else:
+        st.write("No active natural events found or failed to retrieve data.")
+elif api_choice == 'EPIC Imagery':
+    display_epic_images()
 
 st.sidebar.header("About")
 st.sidebar.text("Explore various NASA APIs including daily astronomy pictures, Mars rover photos, and data about near-Earth objects.")
