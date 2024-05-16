@@ -43,21 +43,9 @@ def fetch_neo(start_date, end_date):
     }
     response = requests.get(NEO_URL, params=params)
     return response.json()
-if api_choice == 'Astronomy Picture of the Day':
-    apod_data = fetch_apod()
-    if 'url' in apod_data:
-        st.image(apod_data["url"], caption=apod_data["title"])
-        st.write(apod_data["explanation"])
 
-elif api_choice == 'Mars Rover Photos':
-    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
-    date = st.date_input("Choose a date:", datetime.now() - timedelta(days=1))
-    photos = fetch_mars_photos(rover_choice, date.strftime('%Y-%m-%d'))
-    if photos.get('photos'):
-        for photo in photos['photos']:
-            st.image(photo['img_src'], caption=f"Rover: {rover_choice} Photo ID: {photo['id']}")
 
-elif api_choice == 'Near Earth Objects':
+if api_choice == 'Near Earth Objects':
     # User inputs for date range
     selected_date = st.date_input("Select date(data will be shown for the trailing 6 days):", datetime.now().date())
     start_date = selected_date - timedelta(days=6)
@@ -90,6 +78,21 @@ elif api_choice == 'Near Earth Objects':
             st.error("No near Earth object data available for the selected dates.")
     else:
         st.error("Failed to retrieve NEO data or no data available for the selected period.")
+elif api_choice == 'Astronomy Picture of the Day':
+    apod_data = fetch_apod()
+    if 'url' in apod_data:
+        st.image(apod_data["url"], caption=apod_data["title"])
+        st.write(apod_data["explanation"])
+
+elif api_choice == 'Mars Rover Photos':
+    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
+    date = st.date_input("Choose a date:", datetime.now() - timedelta(days=1))
+    photos = fetch_mars_photos(rover_choice, date.strftime('%Y-%m-%d'))
+    if photos.get('photos'):
+        for photo in photos['photos']:
+            st.image(photo['img_src'], caption=f"Rover: {rover_choice} Photo ID: {photo['id']}")
+
+
 
 st.sidebar.header("About")
 st.sidebar.text("Explore various NASA APIs including daily astronomy pictures, Mars rover photos, and data about near-Earth objects.")
