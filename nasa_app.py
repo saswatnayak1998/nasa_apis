@@ -16,23 +16,24 @@ st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.selectbox(
     'Choose an API to explore:',
-    ('Astronomy Picture of the Day', 'Mars Rover Photos', 'Near Earth Objects')
+    ('Near Earth Objects', 'Astronomy Picture of the Day', 'Mars Rover Photos')
 )
 
 
 def fetch_apod():
-    return requests.get(APOD_URL, params={"api_key": API_KEY}).json()
+    response = requests.get(APOD_URL, params={"api_key": API_KEY})
+    try:
+        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+        return response.json()  # Try to decode JSON only if the response was successful
+    except requests.exceptions.HTTPError as e:
+        st.error(f"HTTP Error occurred: {str(e)}")
+    except requests.exceptions.JSONDecodeError as e:
+        st.error("Failed to decode JSON from response.")
+    return {}  # Return an empty dictionary in case of error
 
 def fetch_mars_photos(rover, date):
-    """Fetch photos from the Mars Rover API."""
     url = f"{MARS_ROVER_URL}/{rover}/photos"
-    params = {"api_key": API_KEY, "earth_date": date}
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        st.error("Failed to fetch data from NASA API.")
-        return {"photos": []}  #
+    return requests.get(url, params={"api_key": API_KEY, "earth_date": date}).json()
 
 def fetch_neo(start_date, end_date):
     params = {
@@ -49,7 +50,7 @@ if api_choice == 'Astronomy Picture of the Day':
         st.write(apod_data["explanation"])
 
 elif api_choice == 'Mars Rover Photos':
-    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity'])
+    rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
     date = st.date_input("Choose a date:", datetime.now() - timedelta(days=1))
     photos = fetch_mars_photos(rover_choice, date.strftime('%Y-%m-%d'))
     if photos.get('photos'):
