@@ -14,7 +14,7 @@ NEO_URL = "https://api.nasa.gov/neo/rest/v1/feed"
 
 st.title('NASA API Explorer- Saswat K Nayak')
 
-api_choice = st.sidebar.selectbox(
+api_choice = st.selectbox(
     'Choose an API to explore:',
     ('Astronomy Picture of the Day', 'Mars Rover Photos', 'Near Earth Objects')
 )
