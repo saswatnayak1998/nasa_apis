@@ -1,5 +1,3 @@
-
-
 import random
 import streamlit as st
 import requests
@@ -8,9 +6,14 @@ import plotly.express as px
 from datetime import datetime, timedelta
 import folium
 from streamlit_folium import folium_static
+from dotenv import load_dotenv
+import os
 
+load_dotenv()  # take environment variables from .env.
+api_key_1 = os.getenv('API_KEY_1')
+api_key_2 = os.getenv('API_KEY_2')
 
-api_keys = ["pl2NcVYoHW1bLwZc9THdmIpGaSKKuRf7PE5Eu0rc", "KFvIFI8nJKBcLk7TBPRaIuMDMGf41qTnfnqIKz2H"]
+api_keys = [api_key_1, api_key_2]
 
 API_KEY = random.choice(api_keys)
 APOD_URL = "https://api.nasa.gov/planetary/apod" 
@@ -25,7 +28,7 @@ api_choice = st.selectbox(
 )
 
 def fetch_epic_data():
-    API_KEY = random.choice(api_keys)  # Randomly choose an API key
+    API_KEY = random.choice(api_keys)  
     EPIC_URL = "https://api.nasa.gov/EPIC/api/natural/images"
     params = {
         "api_key": API_KEY
