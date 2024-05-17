@@ -13,7 +13,7 @@ from streamlit_folium import folium_static
 api_keys = ["pl2NcVYoHW1bLwZc9THdmIpGaSKKuRf7PE5Eu0rc", "KFvIFI8nJKBcLk7TBPRaIuMDMGf41qTnfnqIKz2H"]
 
 API_KEY = random.choice(api_keys)
-APOD_URL = "https://api.nasa.gov/planetary/apod"
+APOD_URL = "https://api.nasa.gov/planetary/apod" 
 MARS_ROVER_URL = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 NEO_URL = "https://api.nasa.gov/neo/rest/v1/feed"
 
@@ -21,7 +21,7 @@ st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.selectbox(
     'Choose an API to explore:',
-    ('Near Earth Objects', 'Astronomy Picture of the Day', 'Mars Rover Photos', 'EPIC Imagery', 'EONET Natural Events')
+    ('Astronomy Picture of the Day', 'Near Earth Objects', 'Mars Rover Photos', 'EPIC Imagery', 'EONET Natural Events')
 )
 
 def fetch_epic_data():
@@ -133,6 +133,7 @@ if api_choice == 'Near Earth Objects':
             st.error("No near Earth object data available for the selected dates.")
     else:
         st.error("Failed to retrieve NEO data or no data available for the selected period.")
+
 elif api_choice == 'Astronomy Picture of the Day':
     apod_data = fetch_apod()
     if 'url' in apod_data:
