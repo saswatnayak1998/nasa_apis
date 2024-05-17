@@ -8,6 +8,8 @@ import folium
 from streamlit_folium import folium_static
 from dotenv import load_dotenv
 import os
+from skyfield.api import Topos, load, EarthSatellite, wgs84
+from plotly.graph_objects import Figure, Scattergeo
 
 load_dotenv()  # take environment variables from .env.
 api_key_1 = os.getenv('API_KEY_1')
@@ -24,8 +26,57 @@ st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.selectbox(
     'Choose an API to explore:',
-    ('Astronomy Picture of the Day', 'Near Earth Objects', 'Mars Rover Photos', 'EPIC Imagery', 'EONET Natural Events')
+    ('Astronomy Picture of the Day', 'Near Earth Objects', 'Mars Rover Photos', 'EPIC Imagery', 'EONET Natural Events', 'Satellite Tracking')
 )
+
+def get_satellite_list():
+    stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
+    satellites = load.tle_file(stations_url)
+    satellite_dict = {sat.name: sat for sat in satellites}
+    return satellite_dict
+
+satellite_dict = get_satellite_list()
+
+def plot_satellite_orbit(satellite, duration_hours=24, timestep_minutes=10):
+    ts = load.timescale()
+    t0 = ts.now()
+    times = [t0 + timedelta(minutes=i) for i in range(0, duration_hours * 60, timestep_minutes)]
+
+    latitudes, longitudes = [], []
+    for t in times:
+        geocentric = satellite.at(t)
+        subpoint = wgs84.subpoint(geocentric)
+        latitudes.append(subpoint.latitude.degrees)
+        longitudes.append(subpoint.longitude.degrees)
+
+    df = pd.DataFrame({
+        'Latitude': latitudes,
+        'Longitude': longitudes,
+        'Time': [t.utc_datetime() for t in times]
+    })
+
+    fig = px.line_geo(df, lat='Latitude', lon='Longitude', projection="orthographic")
+    # Customizing map layout if needed:
+    fig.update_layout(
+        geo=dict(
+            showcountries=True, 
+            showcoastlines=True,
+            countrycolor="RebeccaPurple"
+        )
+    )
+    st.plotly_chart(fig)
+
+# Display current position on a map
+def display_current_position(satellite):
+    ts = load.timescale()
+    t = ts.now()
+    geocentric = satellite.at(t)
+    subpoint = wgs84.subpoint(geocentric)
+    lat, lon = subpoint.latitude.degrees, subpoint.longitude.degrees
+
+    m = folium.Map(location=[lat, lon], zoom_start=3)
+    folium.Marker([lat, lon], popup=f"{satellite.name}").add_to(m)
+    folium_static(m)
 
 def fetch_epic_data():
     API_KEY = random.choice(api_keys)  
@@ -137,6 +188,14 @@ if api_choice == 'Near Earth Objects':
     else:
         st.error("Failed to retrieve NEO data or no data available for the selected period.")
 
+
+elif api_choice == 'Satellite Tracking':
+    satellite_choice = st.selectbox('Choose a Satellite:', list(satellite_dict.keys()))
+    satellite = satellite_dict[satellite_choice]
+    if st.button("Show Current Position"):
+        display_current_position(satellite)
+    if st.button("Show Orbit Path"):
+        plot_satellite_orbit(satellite)
 elif api_choice == 'Astronomy Picture of the Day':
     apod_data = fetch_apod()
     if 'url' in apod_data:
@@ -163,4 +222,4 @@ elif api_choice == 'EPIC Imagery':
     display_epic_images()
 
 st.sidebar.header("About")
-st.sidebar.text("Explore various NASA APIs including daily astronomy pictures, Mars rover photos, and data about near-Earth objects.")
+st.sidebar.text("Explore various NASA APIs including daily astronomy pictures, Mars rover photos, data about near-Earth objects, natural events, and real-time satellite tracking.")

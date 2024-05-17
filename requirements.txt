@@ -5,3 +5,4 @@ datetime
 streamlit-folium
 folium
 python-dotenv 
+skyfield
