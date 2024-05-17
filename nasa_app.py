@@ -11,7 +11,7 @@ import os
 from skyfield.api import Topos, load, EarthSatellite, wgs84
 from plotly.graph_objects import Figure, Scattergeo
 
-load_dotenv()  # take environment variables from .env.
+load_dotenv()  
 api_key_1 = os.getenv('API_KEY_1')
 api_key_2 = os.getenv('API_KEY_2')
 
@@ -56,7 +56,6 @@ def plot_satellite_orbit(satellite, duration_hours=24, timestep_minutes=10):
     })
 
     fig = px.line_geo(df, lat='Latitude', lon='Longitude', projection="orthographic")
-    # Customizing map layout if needed:
     fig.update_layout(
         geo=dict(
             showcountries=True, 
@@ -66,7 +65,6 @@ def plot_satellite_orbit(satellite, duration_hours=24, timestep_minutes=10):
     )
     st.plotly_chart(fig)
 
-# Display current position on a map
 def display_current_position(satellite):
     ts = load.timescale()
     t = ts.now()
@@ -115,7 +113,6 @@ def fetch_eonet_events():
         st.error("Failed to fetch EONET data.")
         return []
 def display_events_on_map(events):
-    # Start with a base map
     m = folium.Map(location=[20, 0], zoom_start=2)
     # Add markers for each event
     for event in events:
@@ -126,19 +123,18 @@ def display_events_on_map(events):
                     popup=f"{event['title']}",
                     tooltip=event['title']
                 ).add_to(m)
-    # Display the map in Streamlit
     folium_static(m)
 
 def fetch_apod():
     response = requests.get(APOD_URL, params={"api_key": API_KEY})
     try:
-        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
-        return response.json()  # Try to decode JSON only if the response was successful
+        response.raise_for_status()  
+        return response.json() 
     except requests.exceptions.HTTPError as e:
         st.error(f"HTTP Error occurred: {str(e)}")
     except requests.exceptions.JSONDecodeError as e:
         st.error("Failed to decode JSON from response.")
-    return {}  # Return an empty dictionary in case of error
+    return {} 
 
 def fetch_mars_photos(rover, date):
     url = f"{MARS_ROVER_URL}/{rover}/photos"
@@ -155,15 +151,13 @@ def fetch_neo(start_date, end_date):
 
 
 if api_choice == 'Near Earth Objects':
-    # User inputs for date range
     selected_date = st.date_input("Select date(data will be shown for the trailing 6 days):", datetime.now().date())
     start_date = selected_date - timedelta(days=6)
-    end_date = selected_date  # The user-selected date is treated as the end date
+    end_date = selected_date  
 
     # Fetching data
     neo_data = fetch_neo(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
     if 'near_earth_objects' in neo_data:
-        # Preparing the dataframe
         data = []
         for date, objects in neo_data["near_earth_objects"].items():
             for obj in objects:
@@ -177,7 +171,6 @@ if api_choice == 'Near Earth Objects':
                     })
         if data:
             df = pd.DataFrame(data)
-            # Generating the scatter plot
             fig = px.scatter(df, x="miss_distance", y="velocity", size="diameter",
                              color="name", hover_data=["close_approach_date"],
                              labels={"miss_distance": "Miss Distance (km)", "velocity": "Velocity (km/h)"},
