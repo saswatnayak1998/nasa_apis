@@ -128,13 +128,17 @@ def display_events_on_map(events):
 def fetch_apod():
     response = requests.get(APOD_URL, params={"api_key": API_KEY})
     try:
-        response.raise_for_status()  
-        return response.json() 
+        response.raise_for_status()
+        data = response.json()
+        if data['media_type'] == 'image':
+            return {"type": "image", "url": data['url'], "title": data['title'], "explanation": data['explanation']}
+        elif data['media_type'] == 'video':
+            return {"type": "video", "url": data['url'], "title": data['title'], "explanation": data['explanation']}
     except requests.exceptions.HTTPError as e:
         st.error(f"HTTP Error occurred: {str(e)}")
     except requests.exceptions.JSONDecodeError as e:
         st.error("Failed to decode JSON from response.")
-    return {} 
+    return {"type": "error"}  # Return an error type if something goes wrong
 
 def fetch_mars_photos(rover, date):
     url = f"{MARS_ROVER_URL}/{rover}/photos"
@@ -191,9 +195,16 @@ elif api_choice == 'Satellite Tracking':
         plot_satellite_orbit(satellite)
 elif api_choice == 'Astronomy Picture of the Day':
     apod_data = fetch_apod()
-    if 'url' in apod_data:
+    if apod_data['type'] == "image":
         st.image(apod_data["url"], caption=apod_data["title"])
         st.write(apod_data["explanation"])
+    elif apod_data['type'] == "video":
+        st.video(apod_data["url"])
+        st.write(apod_data["title"])
+        st.write(apod_data["explanation"])
+    else:
+        st.error("Failed to retrieve APOD data or no data available for the selected period.")
+
 
 elif api_choice == 'Mars Rover Photos':
     rover_choice = st.selectbox('Choose a Rover:', ['Curiosity', 'Opportunity', 'Spirit'])
