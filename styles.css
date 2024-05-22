@@ -1,0 +1,13 @@
+body {
+    background-image: './ground-view-beautiful-trees-sky.jpg'; /* Replace with your image URL */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+}
+
+.stApp {
+    background: rgba(251, 250, 250, 0.5); /* Adds a translucent dark background to the main app content */
+    padding: 20px;
+    border-radius: 10px;
+}
