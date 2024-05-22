@@ -15,6 +15,7 @@ load_dotenv()
 print(load_dotenv())  
 api_key_1 = os.getenv('API_KEY_1')
 api_key_2 = os.getenv('API_KEY_2')
+api_keys = [api_key_1, api_key_2]
 
 API_KEY = random.choice(api_keys)
 APOD_URL = "https://api.nasa.gov/planetary/apod" 
