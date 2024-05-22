@@ -1,13 +1,23 @@
 body {
-    background-image: url('https://i0.wp.com/www.sciencenews.org/wp-content/uploads/2023/03/032723_bdh_habitable-exomoons_feat.jpg?w=1440&ssl=1'); /* Replace with your image URL */
+    background-image: url('https://www.nasa.gov/wp-content/uploads/2023/01/webb-tarantula-neb.png'); /* Replace with your image URL */
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: white;
+    color: rgb(3, 3, 3);
 }
 
+
 .stApp {
-    background: rgba(224, 179, 179, 0); /* Adds a translucent dark background to the main app content */
+    background: rgba(0, 0, 0, 0.5); /* Adds a translucent dark background to the main app content */
     padding: 20px;
     border-radius: 10px;
+}
+
+
+
+.stMarkdown , .stText{
+    background: rgba(37, 36, 36, 0.8); /* Adds a semi-transparent white background to sidebar */
+    padding: 10px;
+    border-radius: 10px;
+    color: rgb(255, 255, 255); /* Sets text color to black for readability */
 }

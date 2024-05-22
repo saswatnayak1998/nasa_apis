@@ -204,8 +204,8 @@ elif api_choice == 'Astronomy Picture of the Day':
         st.write(apod_data["explanation"])
     elif apod_data['type'] == "video":
         st.video(apod_data["url"])
-        st.write(apod_data["title"])
-        st.write(apod_data["explanation"])
+        st.markdown(apod_data["title"], unsafe_allow_html=True)
+        st.markdown(apod_data["explanation"], unsafe_allow_html=True)
     else:
         st.error("Failed to retrieve APOD data or no data available for the selected period.")
 
