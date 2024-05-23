@@ -1,23 +1,23 @@
-body {
+/* body {
     background-image: url('https://www.nasa.gov/wp-content/uploads/2023/01/webb-tarantula-neb.png'); /* Replace with your image URL */
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    color: rgb(3, 3, 3);
+    color: rgb(255, 255, 255);
 }
 
 
 .stApp {
-    background: rgba(0, 0, 0, 0.5); /* Adds a translucent dark background to the main app content */
+    background: rgba(255, 255, 255, 0.5); /* Adds a translucent dark background to the main app content */
     padding: 20px;
     border-radius: 10px;
 }
 
 
 
-.stMarkdown , .stText{
-    background: rgba(37, 36, 36, 0.8); /* Adds a semi-transparent white background to sidebar */
+.stMarkdown , .stHeader, .stText{
+    background: rgba(35, 32, 32, 0.8); /* Adds a semi-transparent white background to sidebar */
     padding: 10px;
     border-radius: 10px;
     color: rgb(255, 255, 255); /* Sets text color to black for readability */
-}
+} */

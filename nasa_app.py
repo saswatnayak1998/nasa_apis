@@ -21,11 +21,11 @@ APOD_URL = "https://api.nasa.gov/planetary/apod"
 MARS_ROVER_URL = "https://api.nasa.gov/mars-photos/api/v1/rovers"
 NEO_URL = "https://api.nasa.gov/neo/rest/v1/feed"
 
-def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# def local_css(file_name):
+#     with open(file_name) as f:
+#         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-local_css("styles.css")
+# local_css("styles.css")
 st.title('NASA API Explorer- Saswat K Nayak')
 
 api_choice = st.selectbox(
